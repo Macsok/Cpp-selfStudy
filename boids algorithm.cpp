@@ -5,7 +5,7 @@
 
 //  Parameters
 const int GridSize = 200;
-const int BirdsNumber = 250;
+const int BirdsNumber = 150;
 const int GroupRadius = 10;
 
 const float CohesionMultiplier = 0.05;
@@ -82,8 +82,8 @@ void updateAverage(float bird[2]){
     }
     //save to global var.
     //position
-    localAverage[0][0] = pos[0] / i;
-    localAverage[0][1] = pos[1] / i;
+    localAverage[0][0] = (pos[0] / i);
+    localAverage[0][1] = (pos[1] / i);
     //direction
     localAverage[1][0] = dir[0] / i;
     localAverage[1][1] = dir[1] / i;
@@ -120,6 +120,13 @@ void Separation(int bird_index, float multiplier){
     //if close then vec = vec - (close_boid_location - boid_location)
     birds[bird_index][1][0] += (birds[bird_index][0][0] - localAverage[0][0]) * multiplier;
     birds[bird_index][1][1] += (birds[bird_index][0][1] - localAverage[0][1]) * multiplier;
+
+    //separate pairs
+    if(birds[bird_index][0][1] == localAverage[0][1] && 1 == 2){
+        //birds[bird_index][1][0] += 1;
+        birds[bird_index][1][0] += (rand() % 3 - 1) * multiplier * 4;
+        birds[bird_index][1][1] += (rand() % 3 - 1) * multiplier * 4;
+    }
 }
 
 void Alignment(int bird_index, float multiplier){
@@ -186,6 +193,8 @@ void symulate(bool follow = false){
 
             //create local group
             updateLocalGroup(birds[k][0], GroupRadius);
+            //calculate local center of mass
+            updateAverage(birds[k][0]);
 
             //mark followed boids
             if(follow && k == 0){
@@ -193,8 +202,6 @@ void symulate(bool follow = false){
                 markBird(birds[k][0]);
             }
 
-            //calculate local center of mass
-            updateAverage(birds[k][0]);
             //apply cohesion rule
             Cohesion(k, CohesionMultiplier);
             //apply alignment rule
@@ -213,8 +220,20 @@ void symulate(bool follow = false){
     }
 }
 
+void symulateGrouping(void){
+    generateBirds();
+    setDefaultDirection(0.01);
+    while(true){
+        displayBirds();
+        //setDefaultDirection(BoidSpeed);
+        for(int i = 0; i < BirdsNumber; i++){
+            updateLocation(i, BoidSpeed);   
+        }
+    }
+}
+
 int main(){
     srand(time(NULL));
-    symulate();
+    symulateGrouping();
     return 0;
 }
